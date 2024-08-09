@@ -21,6 +21,7 @@ const {
     deleteAllProductReviews,
     addReview,
     getInterestedCustomers,
+    getCustomersWhoOrderedProduct,
     getAddedToCartProducts,
 } = require('../controllers/productController.js');
 
@@ -48,6 +49,7 @@ router.get('/getSellerProducts/:id', getSellerProducts);
 router.get('/getProducts', getProducts);
 router.get('/getProductDetail/:id', getProductDetail);
 router.get('/getInterestedCustomers/:id', getInterestedCustomers);
+router.get('/getCustomersWhoOrderedProduct/:id', getCustomersWhoOrderedProduct);
 router.get('/getAddedToCartProducts/:id', getAddedToCartProducts);
 
 router.put('/ProductUpdate/:id', updateProduct);
