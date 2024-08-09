@@ -271,31 +271,39 @@ const getAddedToCartProducts = async (req, res) => {
         const customersWithSellerProduct = await Customer.find({
             'cartDetails.seller': sellerId
         });
+    
 
         const productMap = new Map(); // Use a Map to aggregate products by ID
         customersWithSellerProduct.forEach(customer => {
-            customer.cartDetails.forEach(cartItem => {
-                if (cartItem.seller.toString() === sellerId) {
-                    const productId = cartItem._id.toString();
-                    if (productMap.has(productId)) {
-                        // If product ID already exists, update the quantity
-                        const existingProduct = productMap.get(productId);
-                        existingProduct.quantity += cartItem.quantity;
+            if (customer.cartDetails && Array.isArray(customer.cartDetails)) {
+                customer.cartDetails.forEach(cartItem => {
+                    // Check if seller and _id fields exist
+                    if (cartItem.seller && cartItem._id) {
+                        if (cartItem.seller.toString() === sellerId) {
+                            const productId = cartItem._id.toString();
+                            if (productMap.has(productId)) {
+                                const existingProduct = productMap.get(productId);
+                                existingProduct.quantity += cartItem.quantity;
+                            } else {
+                                productMap.set(productId, {
+                                    productName: cartItem.productName,
+                                    quantity: cartItem.quantity,
+                                    category: cartItem.category,
+                                    subcategory: cartItem.subcategory,
+                                    productID: productId,
+                                });
+                            }
+                        }
                     } else {
-                        // If product ID does not exist, add it to the Map
-                        productMap.set(productId, {
-                            productName: cartItem.productName,
-                            quantity: cartItem.quantity,
-                            category: cartItem.category,
-                            subcategory: cartItem.subcategory,
-                            productID: productId,
-                        });
+                        // Log warning if seller or _id is missing
+                        console.warn("Missing seller or _id in cartItem:", cartItem);
                     }
-                }
-            });
+                });
+            }
         });
 
         const productsInCart = Array.from(productMap.values());
+        console.log("Products in cart:", productsInCart);
 
         if (productsInCart.length > 0) {
             res.send(productsInCart);
@@ -303,9 +311,12 @@ const getAddedToCartProducts = async (req, res) => {
             res.send({ message: 'No products from this seller are added to cart by customers.' });
         }
     } catch (error) {
-        res.status(500).json(error);
+        console.error("Error in getAddedToCartProducts:", error);
+        res.status(500).json({ message: "Internal Server Error", error });
     }
 };
+
+
 
 module.exports = {
     productCreate,
