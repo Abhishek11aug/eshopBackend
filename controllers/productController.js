@@ -1,6 +1,5 @@
 const Product = require("../models/productSchema");
 const Customer = require("../models/customerSchema");
-const Order = require("../models/orderSchema");
 
 const productCreate = async (req, res) => {
     try {
@@ -265,42 +264,6 @@ const getInterestedCustomers = async (req, res) => {
     }
 };
 
-const getCustomersWhoOrderedProduct = async (req, res) => {
-    try {
-        const productId = req.params.id;
-
-        // Fetch orders containing the specified product
-        const ordersWithProduct = await Order.find({
-            'orderedProducts.productId': productId
-        }).populate('buyer', 'name _id');
-
-        if (ordersWithProduct.length === 0) {
-            return res.send({ message: 'No customers have ordered this product.' });
-        }
-
-        // Extract customer details from the orders
-        const customerDetails = ordersWithProduct.map(order => {
-            const productInOrder = order.orderedProducts.find(item => item.productId.toString() === productId);
-
-            return {
-                customerName: order.buyer.name,
-                customerID: order.buyer._id,
-                quantity: productInOrder.quantity,
-                orderDate: order.paidAt,
-                orderID: order._id,
-            };
-        });
-
-        if (customerDetails.length > 0) {
-            res.send(customerDetails);
-        } else {
-            res.send({ message: 'No customers have ordered this product.' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'An error occurred', error });
-    }
-};
-
 const getAddedToCartProducts = async (req, res) => {
     try {
         const sellerId = req.params.id;
@@ -370,6 +333,5 @@ module.exports = {
     deleteProductReview,
     deleteAllProductReviews,
     getInterestedCustomers,
-    getCustomersWhoOrderedProduct,
     getAddedToCartProducts,
 };

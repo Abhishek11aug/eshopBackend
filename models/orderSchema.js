@@ -34,11 +34,6 @@ const orderSchema = new mongoose.Schema(
             },
         },
         orderedProducts: [{
-            productId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'product', // Assuming 'product' is the name of the product model
-                required: true
-            },
             productName: {
                 type: String
             },
